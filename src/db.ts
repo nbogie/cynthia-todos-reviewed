@@ -4,7 +4,7 @@ export interface Todo {
   task: string;
   creationDate: Date;
   dueDate: Date;
-  completed: boolean
+  completed: boolean;
 }
 
 export interface TodoWithId extends Todo {
@@ -29,7 +29,7 @@ export const addDummyTodoTasks = (n: number): TodoWithId[] => {
       task: faker.lorem.words(3),
       creationDate: faker.date.recent(5),
       dueDate: faker.date.soon(10),
-      completed:faker.datatype.boolean(),
+      completed: faker.datatype.boolean(),
     });
     createdTodos.push(createdTodo);
   }
@@ -87,7 +87,7 @@ const findIndexOfTodoTaskById = (id: number): number | "not found" => {
 };
 
 /**
- * Find all todo task 
+ * Find all todo task
  * @returns all todo task from the database
  */
 export const getAllTodoTasks = (): TodoWithId[] => {

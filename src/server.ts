@@ -71,7 +71,10 @@ app.delete<{ id: string }>("/todos/:id", (req, res) => {
 
 // PATCH /items/:id
 app.patch<{ id: string }, {}, Partial<Todo>>("/todos/:id", (req, res) => {
-  const matchingSignature = updateTodoTaskById(parseInt(req.params.id), req.body);
+  const matchingSignature = updateTodoTaskById(
+    parseInt(req.params.id),
+    req.body
+  );
   if (matchingSignature === "not found") {
     res.status(404).json(matchingSignature);
   } else {
