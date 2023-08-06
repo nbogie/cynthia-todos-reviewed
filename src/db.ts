@@ -1,41 +1,49 @@
-export interface DbItem {
-  // sketch out interface here
+import faker from "faker";
+
+export interface Todo {
+  task: string;
+  creationDate: Date;
+  dueDate: Date;
+  completed: boolean
 }
 
-export interface DbItemWithId extends DbItem {
+export interface TodoWithId extends Todo {
   id: number;
 }
 
-const db: DbItemWithId[] = [];
+const db: TodoWithId[] = [];
 
-/** Variable to keep incrementing id of database items */
+/** Variable to keep incrementing id of todo tasks */
 let idCounter = 0;
 
 /**
- * Adds in some dummy database items to the database
+ * Adds in some dummy todo tasks to the database
  *
- * @param n - the number of items to generate
- * @returns the created items
+ * @param n - the number of todo tasks to generate
+ * @returns the created todo tasks
  */
-export const addDummyDbItems = (n: number): DbItemWithId[] => {
-  const createdSignatures: DbItemWithId[] = [];
+export const addDummyTodoTasks = (n: number): TodoWithId[] => {
+  const createdTodos: TodoWithId[] = [];
   for (let count = 0; count < n; count++) {
-    const createdSignature = addDbItem({
-      // possibly add some generated data here
+    const createdTodo = addTodo({
+      task: faker.lorem.words(3),
+      creationDate: faker.date.recent(5),
+      dueDate: faker.date.soon(10),
+      completed:faker.datatype.boolean(),
     });
-    createdSignatures.push(createdSignature);
+    createdTodos.push(createdTodo);
   }
-  return createdSignatures;
+  return createdTodos;
 };
 
 /**
- * Adds in a single item to the database
+ * Adds in a single todo to the database
  *
- * @param data - the item data to insert in
- * @returns the item added (with a newly created id)
+ * @param data - the todo data to insert in
+ * @returns the todo added (with a newly created id)
  */
-export const addDbItem = (data: DbItem): DbItemWithId => {
-  const newEntry: DbItemWithId = {
+export const addTodo = (data: Todo): TodoWithId => {
+  const newEntry: TodoWithId = {
     id: ++idCounter,
     ...data,
   };
@@ -44,31 +52,31 @@ export const addDbItem = (data: DbItem): DbItemWithId => {
 };
 
 /**
- * Deletes a database item with the given id
+ * Deletes a todo task with the given id
  *
- * @param id - the id of the database item to delete
- * @returns the deleted database item (if originally located),
+ * @param id - the id of the todo task to delete
+ * @returns the deleted todo task (if originally located),
  *  otherwise the string `"not found"`
  */
-export const deleteDbItemById = (id: number): DbItemWithId | "not found" => {
-  const idxToDeleteAt = findIndexOfDbItemById(id);
+export const deleteTodoTaskById = (id: number): TodoWithId | "not found" => {
+  const idxToDeleteAt = findIndexOfTodoTaskById(id);
   if (typeof idxToDeleteAt === "number") {
-    const itemToDelete = getDbItemById(id);
+    const TodoTaskToDelete = getTodoTaskById(id);
     db.splice(idxToDeleteAt, 1); // .splice can delete from an array
-    return itemToDelete;
+    return TodoTaskToDelete;
   } else {
     return "not found";
   }
 };
 
 /**
- * Finds the index of a database item with a given id
+ * Finds the index of a todo task with a given id
  *
- * @param id - the id of the database item to locate the index of
- * @returns the index of the matching database item,
+ * @param id - the id of the todo task to locate the index of
+ * @returns the index of the matching todo task,
  *  otherwise the string `"not found"`
  */
-const findIndexOfDbItemById = (id: number): number | "not found" => {
+const findIndexOfTodoTaskById = (id: number): number | "not found" => {
   const matchingIdx = db.findIndex((entry) => entry.id === id);
   // .findIndex returns -1 if not located
   if (matchingIdx !== -1) {
@@ -79,21 +87,21 @@ const findIndexOfDbItemById = (id: number): number | "not found" => {
 };
 
 /**
- * Find all database items
- * @returns all database items from the database
+ * Find all todo task 
+ * @returns all todo task from the database
  */
-export const getAllDbItems = (): DbItemWithId[] => {
+export const getAllTodoTasks = (): TodoWithId[] => {
   return db;
 };
 
 /**
- * Locates a database item by a given id
+ * Locates a todo task by a given id
  *
- * @param id - the id of the database item to locate
- * @returns the located database item (if found),
+ * @param id - the id of the todo task to locate
+ * @returns the located todo task (if found),
  *  otherwise the string `"not found"`
  */
-export const getDbItemById = (id: number): DbItemWithId | "not found" => {
+export const getTodoTaskById = (id: number): TodoWithId | "not found" => {
   const maybeEntry = db.find((entry) => entry.id === id);
   if (maybeEntry) {
     return maybeEntry;
@@ -103,19 +111,19 @@ export const getDbItemById = (id: number): DbItemWithId | "not found" => {
 };
 
 /**
- * Applies a partial update to a database item for a given id
+ * Applies a partial update to a todo task for a given id
  *  based on the passed data
  *
- * @param id - the id of the database item to update
+ * @param id - the id of the todo task to update
  * @param newData - the new data to overwrite
- * @returns the updated database item (if one is located),
+ * @returns the updated todo task (if one is located),
  *  otherwise the string `"not found"`
  */
-export const updateDbItemById = (
+export const updateTodoTaskById = (
   id: number,
-  newData: Partial<DbItem>
-): DbItemWithId | "not found" => {
-  const idxOfEntry = findIndexOfDbItemById(id);
+  newData: Partial<Todo>
+): TodoWithId | "not found" => {
+  const idxOfEntry = findIndexOfTodoTaskById(id);
   // type guard against "not found"
   if (typeof idxOfEntry === "number") {
     return Object.assign(db[idxOfEntry], newData);
