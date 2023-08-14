@@ -1,3 +1,4 @@
+import { Client } from "pg";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -11,21 +12,17 @@ import {
 } from "./db";
 import filePath from "./filePath";
 
-// loading in some dummy items into the database
-// (comment out if desired, or change the number)
 addDummyTodoTasks(20);
 
-const app = express();
+const client = new Client({ database: "tododb" });
+client.connect();
 
-/** Parses JSON data in a request automatically */
+const app = express();
 app.use(express.json());
-/** To allow 'Cross-Origin Resource Sharing': https://en.wikipedia.org/wiki/Cross-origin_resource_sharing */
 app.use(cors());
 
-// read in contents of any environment variables in the .env file
 dotenv.config();
 
-// use the environment variable PORT, or 4000 as a fallback
 const PORT_NUMBER = process.env.PORT ?? 4000;
 
 // API info page
@@ -34,13 +31,13 @@ app.get("/", (req, res) => {
   res.sendFile(pathToFile);
 });
 
-// GET /items
-app.get("/todos", (req, res) => {
-  const allSignatures = getAllTodoTasks();
-  res.status(200).json(allSignatures);
+// GET /todos
+app.get("/todos", async (req, res) => {
+  const dbResponse = await client.query("SELECT * from todo");
+  res.status(200).json(dbResponse.rows);
 });
 
-// POST /items
+// POST /todos
 app.post<{}, {}, Todo>("/todos", (req, res) => {
   // to be rigorous, ought to handle non-conforming request bodies
   // ... but omitting this as a simplification
@@ -49,7 +46,7 @@ app.post<{}, {}, Todo>("/todos", (req, res) => {
   res.status(201).json(createdSignature);
 });
 
-// GET /items/:id
+// GET /todos/:id
 app.get<{ id: string }>("/todos/:id", (req, res) => {
   const matchingSignature = getTodoTaskById(parseInt(req.params.id));
   if (matchingSignature === "not found") {
@@ -59,7 +56,7 @@ app.get<{ id: string }>("/todos/:id", (req, res) => {
   }
 });
 
-// DELETE /items/:id
+// DELETE /todos/:id
 app.delete<{ id: string }>("/todos/:id", (req, res) => {
   const matchingSignature = getTodoTaskById(parseInt(req.params.id));
   if (matchingSignature === "not found") {
@@ -69,7 +66,7 @@ app.delete<{ id: string }>("/todos/:id", (req, res) => {
   }
 });
 
-// PATCH /items/:id
+// PATCH /todos/:id
 app.patch<{ id: string }, {}, Partial<Todo>>("/todos/:id", (req, res) => {
   const matchingSignature = updateTodoTaskById(
     parseInt(req.params.id),
