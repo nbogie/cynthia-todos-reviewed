@@ -34,17 +34,21 @@ app.get("/", (req, res) => {
 
 // GET /todos
 app.get("/todos", async (req, res) => {
-  const dbResponse = await client.query("SELECT * from todo");
-  res.status(200).json(dbResponse.rows);
+  try {
+    const allTodos = await client.query("SELECT * from todo");
+    res.status(200).json(allTodos.rows);
+  } catch (error) {
+    console.error(getErrorMessage(error));
+  }
 });
 
 // POST /todos
 app.post<{}, {}, Todo>("/todos", async (req, res) => {
   try {
-    const { task, creationDate, dueDate, completed } = req.body;
+    const { description, creationDate, dueDate, completed } = req.body;
     const sqlQuery =
-      "insert into todo(task, creation_date,due_date, completed) values($1,$2,$3,$4) returning *";
-    const values = [task, creationDate, dueDate, completed];
+      "insert into todo(description, creation_date,due_date, completed) values($1,$2,$3,$4) returning *";
+    const values = [description, creationDate, dueDate, completed];
     const newToDo = await client.query(sqlQuery, values);
 
     res.status(201).json(newToDo.rows[0]);
@@ -54,35 +58,80 @@ app.post<{}, {}, Todo>("/todos", async (req, res) => {
 });
 
 // GET /todos/:id
-app.get<{ id: string }>("/todos/:id", (req, res) => {
-  const matchingSignature = getTodoTaskById(parseInt(req.params.id));
-  if (matchingSignature === "not found") {
-    res.status(404).json(matchingSignature);
-  } else {
-    res.status(200).json(matchingSignature);
+app.get<{ id: string }>("/todos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sqlQuery = "select * from todo where todo_id = $1;";
+    const idValue = [id];
+    const todo = await client.query(sqlQuery, idValue);
+    if (todo.rows.length === 0) {
+      res.status(404).json(`The todo task with id ${id} not found`);
+    } else {
+      res.status(200).json(todo.rows[0]);
+    }
+  } catch (error) {
+    console.error(getErrorMessage(error));
+    res
+      .status(500)
+      .json(
+        "Oops something went wrong. Please refresh this page or try again later."
+      );
   }
 });
 
 // DELETE /todos/:id
-app.delete<{ id: string }>("/todos/:id", (req, res) => {
-  const matchingSignature = getTodoTaskById(parseInt(req.params.id));
-  if (matchingSignature === "not found") {
-    res.status(404).json(matchingSignature);
-  } else {
-    res.status(200).json(matchingSignature);
+app.delete<{ id: string }>("/todos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sqlQuery = "delete from todo where todo_id = $1 returning *";
+    const values = [id];
+    const deleteTodo = await client.query(sqlQuery, values);
+    res
+      .status(200)
+      .json({
+        message: "The following todo has been deleted",
+        deleted: deleteTodo.rows[0],
+      });
+  } catch (error) {
+    console.error(getErrorMessage(error));
+    res
+      .status(500)
+      .json(
+        "Oops something went wrong. Please refresh this page or try again later."
+      );
   }
 });
 
 // PATCH /todos/:id
-app.patch<{ id: string }, {}, Partial<Todo>>("/todos/:id", (req, res) => {
-  const matchingSignature = updateTodoTaskById(
-    parseInt(req.params.id),
-    req.body
-  );
-  if (matchingSignature === "not found") {
-    res.status(404).json(matchingSignature);
-  } else {
-    res.status(200).json(matchingSignature);
+app.patch<{ id: string }, {}, Partial<Todo>>("/todos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { description, dueDate, completed } = req.body;
+    const columnUpdates: string[] = [];
+    const updateValues: (string | boolean | Date)[] = [id];
+
+    description !== undefined &&
+      columnUpdates.push(`description = $${updateValues.push(description)}`);
+    dueDate !== undefined &&
+      columnUpdates.push(`due_date = $${updateValues.push(dueDate)}`);
+    completed !== undefined &&
+      columnUpdates.push(`completed = $${updateValues.push(completed)}`);
+
+    const sqlQuery = `update todo set ${columnUpdates.join(
+      ","
+    )} where todo_id = $1 returning *`;
+
+    const updateTodo = await client.query(sqlQuery, updateValues);
+    res
+      .status(200)
+      .json({ message: "Todo has been updated", updated: updateTodo.rows[0] });
+  } catch (error) {
+    console.error(getErrorMessage(error));
+    res
+      .status(500)
+      .json(
+        "Oops something went wrong. Please refresh this page or try again later."
+      );
   }
 });
 
