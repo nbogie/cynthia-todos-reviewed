@@ -1,7 +1,7 @@
 import faker from "faker";
 
 export interface Todo {
-  task: string;
+  description: string;
   creationDate: Date;
   dueDate: Date;
   completed: boolean;
@@ -26,7 +26,7 @@ export const addDummyTodoTasks = (n: number): TodoWithId[] => {
   const createdTodos: TodoWithId[] = [];
   for (let count = 0; count < n; count++) {
     const createdTodo = addTodo({
-      task: faker.lorem.words(3),
+      description: faker.lorem.words(3),
       creationDate: faker.date.recent(5),
       dueDate: faker.date.soon(10),
       completed: faker.datatype.boolean(),
