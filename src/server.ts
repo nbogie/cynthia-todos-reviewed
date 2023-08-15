@@ -11,6 +11,7 @@ import {
   updateTodoTaskById,
 } from "./db";
 import filePath from "./filePath";
+import getErrorMessage from "./utils/getErrorMessage";
 
 addDummyTodoTasks(20);
 
@@ -38,12 +39,18 @@ app.get("/todos", async (req, res) => {
 });
 
 // POST /todos
-app.post<{}, {}, Todo>("/todos", (req, res) => {
-  // to be rigorous, ought to handle non-conforming request bodies
-  // ... but omitting this as a simplification
-  const postData = req.body;
-  const createdSignature = addTodo(postData);
-  res.status(201).json(createdSignature);
+app.post<{}, {}, Todo>("/todos", async (req, res) => {
+  try {
+    const { task, creationDate, dueDate, completed } = req.body;
+    const sqlQuery =
+      "insert into todo(task, creation_date,due_date, completed) values($1,$2,$3,$4) returning *";
+    const values = [task, creationDate, dueDate, completed];
+    const newToDo = await client.query(sqlQuery, values);
+
+    res.status(201).json(newToDo.rows[0]);
+  } catch (error) {
+    console.error(getErrorMessage(error));
+  }
 });
 
 // GET /todos/:id
