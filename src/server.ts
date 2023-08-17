@@ -60,7 +60,7 @@ app.post<{}, {}, Todo>("/todos", async (req, res) => {
 // GET /todos/:id
 app.get<{ id: string }>("/todos/:id", async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id);
     const sqlQuery = "select * from todo where todo_id = $1;";
     const idValue = [id];
     const todo = await client.query(sqlQuery, idValue);
@@ -82,7 +82,7 @@ app.get<{ id: string }>("/todos/:id", async (req, res) => {
 // DELETE /todos/:id
 app.delete<{ id: string }>("/todos/:id", async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id);
     const sqlQuery = "delete from todo where todo_id = $1 returning *";
     const values = [id];
     const deleteTodo = await client.query(sqlQuery, values);
@@ -103,10 +103,10 @@ app.delete<{ id: string }>("/todos/:id", async (req, res) => {
 // PATCH /todos/:id
 app.patch<{ id: string }, {}, Partial<Todo>>("/todos/:id", async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id);
     const { description, completed } = req.body;
     const columnUpdates: string[] = [];
-    const updateValues: (string | boolean | Date)[] = [id];
+    const updateValues: (string | boolean | Date | number)[] = [id];
 
     description !== undefined &&
       columnUpdates.push(`description = $${updateValues.push(description)}`);
