@@ -10,7 +10,17 @@ create table todo(
 );
 
 insert into todo (description, creation_date, completed)
-values ('Finish project proposal', '2023-08-15',false);
+values
+    ('Finish project proposal', '2023-08-15', false),
+    ('Buy groceries', '2023-08-16', false),
+    ('Call client', '2023-08-17', false),
+    ('Study for exam', '2023-08-18', false),
+    ('Go for a run', '2023-08-19', false),
+    ('Write blog post', '2023-08-20', false),
+    ('Prepare presentation', '2023-08-21', false),
+    ('Attend team meeting', '2023-08-22', false),
+    ('Clean the house', '2023-08-23', false),
+    ('Plan weekend trip', '2023-08-24', false);
 
 select * 
 from todo 
