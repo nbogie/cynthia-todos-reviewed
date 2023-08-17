@@ -45,10 +45,10 @@ app.get("/todos", async (req, res) => {
 // POST /todos
 app.post<{}, {}, Todo>("/todos", async (req, res) => {
   try {
-    const { description, creationDate, dueDate, completed } = req.body;
+    const { description, creationDate, completed } = req.body;
     const sqlQuery =
       "insert into todo(description, creation_date,due_date, completed) values($1,$2,$3,$4) returning *";
-    const values = [description, creationDate, dueDate, completed];
+    const values = [description, creationDate, completed];
     const newToDo = await client.query(sqlQuery, values);
 
     res.status(201).json(newToDo.rows[0]);
@@ -86,12 +86,10 @@ app.delete<{ id: string }>("/todos/:id", async (req, res) => {
     const sqlQuery = "delete from todo where todo_id = $1 returning *";
     const values = [id];
     const deleteTodo = await client.query(sqlQuery, values);
-    res
-      .status(200)
-      .json({
-        message: "The following todo has been deleted",
-        deleted: deleteTodo.rows[0],
-      });
+    res.status(200).json({
+      message: "The following todo has been deleted",
+      deleted: deleteTodo.rows[0],
+    });
   } catch (error) {
     console.error(getErrorMessage(error));
     res
@@ -106,14 +104,12 @@ app.delete<{ id: string }>("/todos/:id", async (req, res) => {
 app.patch<{ id: string }, {}, Partial<Todo>>("/todos/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { description, dueDate, completed } = req.body;
+    const { description, completed } = req.body;
     const columnUpdates: string[] = [];
     const updateValues: (string | boolean | Date)[] = [id];
 
     description !== undefined &&
       columnUpdates.push(`description = $${updateValues.push(description)}`);
-    dueDate !== undefined &&
-      columnUpdates.push(`due_date = $${updateValues.push(dueDate)}`);
     completed !== undefined &&
       columnUpdates.push(`completed = $${updateValues.push(completed)}`);
 
