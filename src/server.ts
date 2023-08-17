@@ -47,7 +47,7 @@ app.post<{}, {}, Todo>("/todos", async (req, res) => {
   try {
     const { description, creationDate, completed } = req.body;
     const sqlQuery =
-      "insert into todo(description, creation_date,due_date, completed) values($1,$2,$3,$4) returning *";
+      "insert into todo(description, creation_date, completed) values($1,$2,$3) returning *";
     const values = [description, creationDate, completed];
     const newToDo = await client.query(sqlQuery, values);
 
