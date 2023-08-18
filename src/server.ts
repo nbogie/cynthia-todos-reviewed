@@ -2,27 +2,24 @@ import { Client } from "pg";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import {
-  addDummyTodoTasks,
-  addTodo,
-  getAllTodoTasks,
-  getTodoTaskById,
-  Todo,
-  updateTodoTaskById,
-} from "./db";
+import Todo from "./ToDoInterface";
 import filePath from "./filePath";
 import getErrorMessage from "./utils/getErrorMessage";
+import getEnvVarOrFail from "./utils/getEnvVarOrFail";
 
-addDummyTodoTasks(20);
+dotenv.config();
+const client = new Client({
+  connectionString: getEnvVarOrFail("DATABASE_URL"),
+});
+async function connectToDB() {
+  await client.connect();
+}
 
-const client = new Client({ database: "tododb" });
-client.connect();
+connectToDB();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-
-dotenv.config();
 
 const PORT_NUMBER = process.env.PORT ?? 4000;
 
