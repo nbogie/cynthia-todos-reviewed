@@ -1,8 +1,8 @@
-export function getEnvVarOrFail(key: string) {
+export default function getEnvVarOrFail(key: string) {
   const found = process.env[key];
   if (found) {
     return found;
   } else {
-    throw new Error("missing required env var:");
+    throw new Error("No DATABASE_URL env var!");
   }
 }
