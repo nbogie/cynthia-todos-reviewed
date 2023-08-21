@@ -115,9 +115,10 @@ app.patch<{ id: string }, {}, Partial<Todo>>("/todos/:id", async (req, res) => {
     )} where todo_id = $1 returning *`;
 
     const updateTodo = await client.query(sqlQuery, updateValues);
-    res
-      .status(200)
-      .json({ message: "Todo has been updated", updated: updateTodo.rows[0] });
+    res.status(200).json({
+      message: "The following todo has been updated",
+      updated: updateTodo.rows[0],
+    });
   } catch (error) {
     console.error(getErrorMessage(error));
     res
