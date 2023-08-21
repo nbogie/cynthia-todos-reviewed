@@ -3,6 +3,6 @@ export default function getEnvVarOrFail(key: string) {
   if (found) {
     return found;
   } else {
-    throw new Error("No DATABASE_URL env var!");
+    throw new Error("No env var found for" + key);
   }
 }
