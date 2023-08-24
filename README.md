@@ -1,24 +1,25 @@
-# Academy Express Starter
+# Todo App Backend Server
 
-This is set up as a quick starter for a no-persistence RESTful Express API (using just an array for in-server memory).
+RESTful Express API using PostgreSQL for data persistence.
+
+Click [here](https://github.com/cynthiacodes/todo-react-app) for the frontend todo react app git repo.
 
 ## Getting started
 
-### Shaping the 'database'
-
-`db.ts` is set up for a generic `DbItem` - you may want to reshape and rename that interface.
-
 ### Install dependencies
+
 ```
 yarn
 ```
 
 ### Run server
+
 ```
 yarn start
 ```
 
 Or, for dev mode (restarts server automatically when relevant files change):
+
 ```
 yarn start:dev
 ```
