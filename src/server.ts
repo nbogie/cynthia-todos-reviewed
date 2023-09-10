@@ -1,11 +1,10 @@
-import { Client } from "pg";
-import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import express from "express";
+import { Client } from "pg";
 import Todo from "./ToDoInterface";
-import filePath from "./filePath";
-import getErrorMessage from "./utils/getErrorMessage";
 import getEnvVarOrFail from "./utils/getEnvVarOrFail";
+import { getErrorMessage } from "./utils/getErrorMessage";
 
 dotenv.config();
 const client = new Client({
@@ -25,8 +24,7 @@ const PORT_NUMBER = process.env.PORT ?? 4000;
 
 // API info page
 app.get("/", (req, res) => {
-  const pathToFile = filePath("../public/index.html");
-  res.sendFile(pathToFile);
+  res.send("try /todos");
 });
 
 // GET /todos
