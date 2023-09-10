@@ -1,11 +1,11 @@
-import express from "express";
 import dotenv from "dotenv";
-import { configureRoutes } from "./configureRoutes";
+import express from "express";
 import { connectToDB } from "./db";
+import { configureExpress } from "./configureExpress";
 
 export const app = express();
 
-configureRoutes(app);
+configureExpress(app);
 
 connectToDBAndStartExpressListening();
 
