@@ -8,7 +8,7 @@ const todosRouter = express.Router();
 // GET /todos
 todosRouter.get("/", async (req, res) => {
   try {
-    const allTodos = await queryAndLog("SELECT * from todo");
+    const allTodos = await queryAndLog("SELECT * from todo order by todo_id");
     res.status(200).json(allTodos.rows);
   } catch (error) {
     console.error(getErrorMessage(error));
@@ -63,7 +63,7 @@ todosRouter.get<{ id: string }>("/:id", async (req, res) => {
 // DELETE /todos/:id
 todosRouter.delete<{ id: string }>("/:id", async (req, res) => {
   try {
-    const id = BigInt(req.params.id);
+    const id = parseInt(req.params.id);
     const sqlQuery = "delete from todo where todo_id = $1 returning *";
     const values = [id];
 
