@@ -5,7 +5,7 @@ drop table if exists todo;
 create table todo(
     todo_id serial primary key,
     description varchar(255) not null,
-    creation_date date not null,
+    creation_date date not null default now(),
     completed boolean default 'false'
 );
 
