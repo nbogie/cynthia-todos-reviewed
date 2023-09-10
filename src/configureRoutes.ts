@@ -6,6 +6,8 @@ import { getErrorMessage } from "./utils/getErrorMessage";
 import morgan from "morgan";
 
 export function configureRoutes(app: Express): void {
+  const todosRouter = express.Router();
+
   app.use(express.json());
   app.use(cors());
   app.use(morgan("tiny"));
@@ -15,8 +17,10 @@ export function configureRoutes(app: Express): void {
     res.send("try /todos");
   });
 
+  app.use("/todos", todosRouter);
+
   // GET /todos
-  app.get("/todos", async (req, res) => {
+  todosRouter.get("/", async (req, res) => {
     try {
       const allTodos = await queryAndLog("SELECT * from todo");
       res.status(200).json(allTodos.rows);
@@ -26,7 +30,7 @@ export function configureRoutes(app: Express): void {
   });
 
   // POST /todos
-  app.post<{}, {}, Todo>("/todos", async (req, res) => {
+  todosRouter.post<{}, {}, Todo>("/", async (req, res) => {
     try {
       //TODO: validate!
       const { description, completed } = req.body;
@@ -49,7 +53,7 @@ export function configureRoutes(app: Express): void {
   });
 
   // GET /todos/:id
-  app.get<{ id: string }>("/todos/:id", async (req, res) => {
+  todosRouter.get<{ id: string }>("/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const sqlQuery = "select * from todo where todo_id = $1;";
@@ -71,15 +75,23 @@ export function configureRoutes(app: Express): void {
   });
 
   // DELETE /todos/:id
-  app.delete<{ id: string }>("/todos/:id", async (req, res) => {
+  todosRouter.delete<{ id: string }>("/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = BigInt(req.params.id);
       const sqlQuery = "delete from todo where todo_id = $1 returning *";
       const values = [id];
-      const deleteTodo = await queryAndLog(sqlQuery, values);
+
+      console.log({ id });
+      const dbResult = await queryAndLog(sqlQuery, values);
+      console.log("after query");
+      
+      if (dbResult.rowCount === 0) {
+        res.status(404).json({ message: `Couldn't find todo with id: ${id}` });
+        return;
+      }
       res.status(200).json({
         message: "The following todo has been deleted",
-        deleted: deleteTodo.rows[0],
+        deleted: dbResult.rows[0],
       });
     } catch (error) {
       console.error(getErrorMessage(error));
@@ -92,8 +104,8 @@ export function configureRoutes(app: Express): void {
   });
 
   // PATCH /todos/:id
-  app.patch<{ id: string }, {}, Partial<Todo>>(
-    "/todos/:id",
+  todosRouter.patch<{ id: string }, {}, Partial<Todo>>(
+    "/:id",
     async (req, res) => {
       try {
         const id = parseInt(req.params.id);
